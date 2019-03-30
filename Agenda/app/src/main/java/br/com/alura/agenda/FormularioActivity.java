@@ -1,4 +1,4 @@
-package br.com.giuseppe.agenda;
+package br.com.alura.agenda;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import br.com.giuseppe.agenda.modelo.Aluno;
+import br.com.alura.agenda.dao.AlunoDAO;
+import br.com.alura.agenda.modelo.Aluno;
 
 public class FormularioActivity extends AppCompatActivity {
 
@@ -21,24 +22,21 @@ public class FormularioActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario);
+
         helper = new FormularioHelper(this);
 
-//        Button botaoSalvar = (Button) findViewById(R.id.formulario_botao);
-//
-//        botaoSalvar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                Toast.makeText(FormularioActivity.this, "Botao Clicado", Toast.LENGTH_SHORT).show();
-//                finish();
-//            }
-//        });
+        Intent intent = getIntent();
+        Aluno aluno = (Aluno) intent.getSerializableExtra("aluno");
+
+        if(aluno != null){
+            helper.preencheFormulario(aluno);
+        }
 
 
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) { // criar o meno vazio na direita encima
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_formulario, menu);
         return super.onCreateOptionsMenu(menu);
@@ -46,11 +44,20 @@ public class FormularioActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        switch (item.getItemId()){
             case R.id.menu_formulario_ok:
+                Aluno aluno = helper.getAluno();
+                AlunoDAO dao = new AlunoDAO(this);
 
-                Aluno aluno = helper.pegaAluno();
-                Toast.makeText(FormularioActivity.this, "Aluno " + aluno.getNome() + " Salvo", Toast.LENGTH_SHORT).show();
+                if(aluno.getId() != null){
+                    dao.altera(aluno);
+                }else{
+                    dao.insere(aluno);
+                }
+
+
+                dao.close();
+                Toast.makeText(FormularioActivity.this, "Aluno " + aluno.getNome() + " salvo!", Toast.LENGTH_SHORT).show();
                 finish();
                 break;
         }
